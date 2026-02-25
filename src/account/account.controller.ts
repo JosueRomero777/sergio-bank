@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query } from '@nestjs/common';
 import { AccountService } from './account.service';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
@@ -6,6 +6,11 @@ import { UpdateAccountDto } from './dto/update-account.dto';
 @Controller('accounts')
 export class AccountController {
   constructor(private readonly accountService: AccountService) {}
+
+  @Get('by-client/:id')
+  getByClient(@Param('id') id: number) {
+    return this.accountService.getByClient(Number(id));
+  }
 
   @Post()
   create(@Body() createAccountDto: CreateAccountDto) {
@@ -20,5 +25,14 @@ export class AccountController {
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.accountService.findOne(Number(id));
+  }
+  @Patch(':id')
+  update(@Param('id') id: number, @Body() updateAccountDto: UpdateAccountDto) {
+    return this.accountService.update(Number(id), updateAccountDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: number) {
+    return this.accountService.remove(Number(id));
   }
 }

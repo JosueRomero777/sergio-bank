@@ -40,7 +40,6 @@
     "db:push:support": "npx prisma db push --schema=prisma/schema-support.prisma",
     "db:push:all": "npm run db:push:auth && npm run db:push:academic && npm run db:push:support",
     "db:seed:auth": "tsx prisma/seed-auth.ts",
-    "db:seed:academic": "tsx prisma/seed-academic.ts",
     "db:seed:support": "tsx prisma/seed-support.ts",
     "db:seed:all": "npm run db:seed:auth && npm run db:seed:academic && npm run db:seed:support",
     "db:setup": "npm run prisma:generate && npm run migrate:dev:all && npm run db:seed:all"

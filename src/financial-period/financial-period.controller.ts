@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query } from '@nestjs/common';
 import { FinancialPeriodService } from './financial-period.service';
 import { CreateFinancialPeriodDto } from './dto/create-financial-period.dto';
 import { UpdateFinancialPeriodDto } from './dto/update-financial-period.dto';
@@ -20,5 +20,14 @@ export class FinancialPeriodController {
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.financialPeriodService.findOne(Number(id));
+  }
+  @Patch(':id')
+  update(@Param('id') id: number, @Body() updateFinancialPeriodDto: UpdateFinancialPeriodDto) {
+    return this.financialPeriodService.update(Number(id), updateFinancialPeriodDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: number) {
+    return this.financialPeriodService.remove(Number(id));
   }
 }

@@ -7,6 +7,30 @@ import { UpdateClientDto } from './dto/update-client.dto';
 export class ClientService {
   constructor(private prismaBanco: PrismaBancoService) { }
 
+  async getActiveWithAccounts() {
+    return this.prismaBanco.client.findMany({
+      where: { accounts: { some: {} } },
+      include: { accounts: true },
+    });
+  }
+
+  async filterClients(accountTypeId: number, periodId: number) {
+    // Clientes con cuentas de un tipo y transacciones en un periodo (AND)
+    return this.prismaBanco.client.findMany({
+      where: {
+        accounts: {
+          some: {
+            accountTypeId: accountTypeId,
+            transactionsOrigin: {
+              some: { financialPeriodId: periodId }
+            }
+          }
+        }
+      },
+      include: { accounts: true },
+    });
+  }
+
   async create(createClientDto: CreateClientDto) {
     return this.prismaBanco.client.create({
       data: createClientDto,
@@ -50,6 +74,30 @@ export class ClientService {
         accounts: true,
         products: true,
       },
+    });
+  }
+  async update(id: number, updateClientDto: UpdateClientDto) {
+    const client = await this.prismaBanco.client.findUnique({ where: { id } });
+    if (!client) {
+      throw new NotFoundException(`Client with id ${id} not found`);
+    }
+    return this.prismaBanco.client.update({
+      where: { id },
+      data: updateClientDto,
+      include: {
+        accounts: true,
+        products: true,
+      },
+    });
+  }
+
+  async remove(id: number) {
+    const client = await this.prismaBanco.client.findUnique({ where: { id } });
+    if (!client) {
+      throw new NotFoundException(`Client with id ${id} not found`);
+    }
+    return this.prismaBanco.client.delete({
+      where: { id },
     });
   }
 }

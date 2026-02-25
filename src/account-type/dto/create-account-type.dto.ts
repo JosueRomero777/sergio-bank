@@ -5,15 +5,6 @@ export class CreateAccountTypeDto {
   @IsString()
   name: string;
 
-  @IsNotEmpty()
-  @IsInt()
-  @Min(1)
-  totalCycles: number;
-
-  @IsNotEmpty()
-  @IsInt()
-  @Min(1)
-  durationYears: number;
 
   @IsNotEmpty()
   @IsInt()

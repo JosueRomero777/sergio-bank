@@ -13,8 +13,4 @@ export class CreateFinancialPeriodDto {
   @IsString()
   endDate: string;
 
-  @IsNotEmpty()
-  @IsInt()
-  @Min(1)
-  number: number;
 }

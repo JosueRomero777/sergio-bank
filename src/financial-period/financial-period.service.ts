@@ -42,4 +42,24 @@ export class FinancialPeriodService {
     }
     return financialPeriod;
   }
+  async update(id: number, updateFinancialPeriodDto: UpdateFinancialPeriodDto) {
+    const period = await this.prismaBanco.financialPeriod.findUnique({ where: { id } });
+    if (!period) {
+      throw new NotFoundException(`FinancialPeriod with id ${id} not found`);
+    }
+    return this.prismaBanco.financialPeriod.update({
+      where: { id },
+      data: updateFinancialPeriodDto,
+    });
+  }
+
+  async remove(id: number) {
+    const period = await this.prismaBanco.financialPeriod.findUnique({ where: { id } });
+    if (!period) {
+      throw new NotFoundException(`FinancialPeriod with id ${id} not found`);
+    }
+    return this.prismaBanco.financialPeriod.delete({
+      where: { id },
+    });
+  }
 }

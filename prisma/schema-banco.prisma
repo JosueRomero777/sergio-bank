@@ -61,6 +61,7 @@ model Transaction {
 
   @@index([accountOriginId])
   @@index([accountDestinationId])
+  @@unique([accountOriginId, accountDestinationId, amount, date])
   @@map("transactions")
 }
 
@@ -121,6 +122,8 @@ model Advisor {
   id        Int      @id @default(autoincrement())
   name      String
   email     String   @unique
+  phone     String?
+  userId    Int?
   advisorAccounts AdvisorAccount[]
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -128,6 +131,9 @@ model Advisor {
   @@map("advisors")
     financialPeriodId Int?
     financialPeriod   FinancialPeriod? @relation(fields: [financialPeriodId], references: [id])
+  // Relación con User (de auth) - solo referencia, no FK directa
+  // NOTA: Si quieres FK real, necesitas un datasource referenciado cruzado (no recomendado en Prisma actual)
+  // Aquí solo se guarda el userId como int, la relación lógica la haces en la app
 }
 
 model AdvisorAccount {

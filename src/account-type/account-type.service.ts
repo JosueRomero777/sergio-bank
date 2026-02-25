@@ -57,4 +57,27 @@ export class AccountTypeService {
     }
     return accountType;
   }
+  async update(id: number, updateAccountTypeDto: UpdateAccountTypeDto) {
+    const accountType = await this.prismaBanco.accountType.findUnique({ where: { id } });
+    if (!accountType) {
+      throw new NotFoundException(`AccountType with id ${id} not found`);
+    }
+    return this.prismaBanco.accountType.update({
+      where: { id },
+      data: updateAccountTypeDto,
+      include: {
+        product: true,
+      },
+    });
+  }
+
+  async remove(id: number) {
+    const accountType = await this.prismaBanco.accountType.findUnique({ where: { id } });
+    if (!accountType) {
+      throw new NotFoundException(`AccountType with id ${id} not found`);
+    }
+    return this.prismaBanco.accountType.delete({
+      where: { id },
+    });
+  }
 }

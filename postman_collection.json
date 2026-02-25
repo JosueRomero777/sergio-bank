@@ -3,206 +3,263 @@
     "name": "Banco API Full Test",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('token')) {",
+          "  pm.sendRequest({",
+          "    url: pm.collectionVariables.get('baseUrl') + '/auth/login',",
+          "    method: 'POST',",
+          "    header: { 'Content-Type': 'application/json' },",
+          "    body: {",
+          "      mode: 'raw',",
+          "      raw: JSON.stringify({",
+          "        email: 'admin@banco.com',",
+          "        password: 'admin123'",
+          "      })",
+          "    }",
+          "  }, function (err, res) {",
+          "    if (res && res.json().access_token) {",
+          "      pm.collectionVariables.set('token', res.json().access_token);",
+          "    }",
+          "  });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "token", "value": "" }
+  ],
   "item": [
     {
-      "name": "Auth - Register",
-      "request": {
-        "method": "POST",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "url": {"raw": "http://localhost:3000/auth/register", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["auth", "register"]},
-        "body": {"mode": "raw", "raw": "{\n  \"name\": \"Banco Admin\",\n  \"email\": \"admin@banco.com\",\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"}
-      }
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"]},
+            "body": {"mode": "raw", "raw": "{\n  \"name\": \"Banco Admin2\",\n  \"email\": \"admin2@banco.com\",\n  \"username\": \"admin2\",\n  \"password\": \"admin123\"\n}"}
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"]},
+            "body": {"mode": "raw", "raw": "{\n  \"email\": \"admin@banco.com\",\n  \"password\": \"admin123\"\n}"}
+          }
+        }
+      ]
     },
     {
-      "name": "Auth - Login",
-      "request": {
-        "method": "POST",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "url": {"raw": "http://localhost:3000/auth/login", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["auth", "login"]},
-        "body": {"mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"}
-      }
+      "name": "Clients",
+      "item": [
+        { "name": "Create", "request": {"method": "POST", "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/clients", "host": ["{{baseUrl}}"], "path": ["clients"]}, "body": {"mode": "raw", "raw": "{\n  \"name\": \"Carlos Cliente\",\n  \"email\": \"carlos.cliente@banco.com\",\n  \"address\": \"Calle 123\",\n  \"phone\": \"555-1234\"\n}"}} },
+        { "name": "Get All", "request": {"method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/clients", "host": ["{{baseUrl}}"], "path": ["clients"]} } },
+        { "name": "Get By Id", "request": {"method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/clients/1", "host": ["{{baseUrl}}"], "path": ["clients", "1"]} } },
+        { "name": "Update", "request": {"method": "PATCH", "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/clients/1", "host": ["{{baseUrl}}"], "path": ["clients", "1"]}, "body": {"mode": "raw", "raw": "{\n  \"name\": \"Carlos Cliente Actualizado\"\n}"}} },
+        { "name": "Delete", "request": {"method": "DELETE", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/clients/2", "host": ["{{baseUrl}}"], "path": ["clients", "2"]} } }
+      ]
     },
     {
-      "name": "Clients - Create",
-      "request": {
-        "method": "POST",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "url": {"raw": "http://localhost:3000/clients", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["clients"]},
-        "body": {"mode": "raw", "raw": "{\n  \"name\": \"Carlos Cliente\",\n  \"email\": \"carlos.cliente@banco.com\",\n  \"address\": \"Calle 123\",\n  \"phone\": \"555-1234\"\n}"}
-      }
+      "name": "Accounts",
+      "item": [
+        { "name": "Create", "request": {"method": "POST", "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/accounts", "host": ["{{baseUrl}}"], "path": ["accounts"]}, "body": {"mode": "raw", "raw": "{\n  \"number\": \"ACC123\",\n  \"type\": \"SAVINGS\",\n  \"balance\": 1000,\n  \"clientId\": 1\n}"}} },
+        { "name": "Get All", "request": {"method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/accounts", "host": ["{{baseUrl}}"], "path": ["accounts"]} } },
+        { "name": "Get By Id", "request": {"method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/accounts/1", "host": ["{{baseUrl}}"], "path": ["accounts", "1"]} } },
+        { "name": "Update", "request": {"method": "PATCH", "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/accounts/1", "host": ["{{baseUrl}}"], "path": ["accounts", "1"]}, "body": {"mode": "raw", "raw": "{\n  \"balance\": 2000\n}"}} },
+        { "name": "Delete", "request": {"method": "DELETE", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/accounts/3", "host": ["{{baseUrl}}"], "path": ["accounts", "3"]} } }
+      ]
     },
     {
-      "name": "Clients - Get All",
-      "request": {"method": "GET", "url": {"raw": "http://localhost:3000/clients", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["clients"]}}
+      "name": "Advisors",
+      "item": [
+        { "name": "Create", "request": {"method": "POST", "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/advisors", "host": ["{{baseUrl}}"], "path": ["advisors"]}, "body": {"mode": "raw", "raw": "{\n  \"name\": \"Ana Asesora\",\n  \"email\": \"ana.asesora@banco.com\",\n  \"phone\": \"555-5678\",\n  \"userId\": 1\n}"}} },
+        { "name": "Get All", "request": {"method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/advisors", "host": ["{{baseUrl}}"], "path": ["advisors"]} } },
+        { "name": "Get By Id", "request": {"method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/advisors/1", "host": ["{{baseUrl}}"], "path": ["advisors", "1"]} } },
+        { "name": "Update", "request": {"method": "PATCH", "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/advisors/1", "host": ["{{baseUrl}}"], "path": ["advisors", "1"]}, "body": {"mode": "raw", "raw": "{\n  \"phone\": \"555-9999\"\n}"} } },
+        { "name": "Delete", "request": {"method": "DELETE", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/advisors/1", "host": ["{{baseUrl}}"], "path": ["advisors", "1"]} } }
+      ]
     },
     {
-      "name": "Accounts - Create",
-      "request": {
-        "method": "POST",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "url": {"raw": "http://localhost:3000/accounts", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["accounts"]},
-        "body": {"mode": "raw", "raw": "{\n  \"number\": \"ACC123\",\n  \"type\": \"SAVINGS\",\n  \"balance\": 1000,\n  \"clientId\": 1\n}"}
-      }
+      "name": "AccountTypes",
+      "item": [
+        { "name": "Create", "request": {"method": "POST", "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/account-types", "host": ["{{baseUrl}}"], "path": ["account-types"]}, "body": {"mode": "raw", "raw": "{\n  \"name\": \"Premium\",\n  \"productId\": 1\n}"}} },
+        { "name": "Get All", "request": {"method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/account-types", "host": ["{{baseUrl}}"], "path": ["account-types"]} } },
+        { "name": "Get By Id", "request": {"method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/account-types/1", "host": ["{{baseUrl}}"], "path": ["account-types", "1"]} } },
+        { "name": "Update", "request": {"method": "PATCH", "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/account-types/1", "host": ["{{baseUrl}}"], "path": ["account-types", "1"]}, "body": {"mode": "raw", "raw": "{\n  \"name\": \"Premium Actualizado\"\n}"} } },
+        { "name": "Delete", "request": {"method": "DELETE", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/account-types/1", "host": ["{{baseUrl}}"], "path": ["account-types", "1"]} } }
+      ]
     },
     {
-      "name": "Accounts - Get All",
-      "request": {"method": "GET", "url": {"raw": "http://localhost:3000/accounts", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["accounts"]}}
+      "name": "FinancialPeriods",
+      "item": [
+        { "name": "Create", "request": {"method": "POST", "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/financial-periods", "host": ["{{baseUrl}}"], "path": ["financial-periods"]}, "body": {"mode": "raw", "raw": "{\n  \"name\": \"2026-Q1\",\n  \"startDate\": \"2026-01-01T00:00:00Z\",\n  \"endDate\": \"2026-03-31T23:59:59Z\"\n}"}} },
+        { "name": "Get All", "request": {"method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/financial-periods", "host": ["{{baseUrl}}"], "path": ["financial-periods"]} } },
+        { "name": "Get By Id", "request": {"method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/financial-periods/1", "host": ["{{baseUrl}}"], "path": ["financial-periods", "1"]} } },
+        { "name": "Update", "request": {"method": "PATCH", "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/financial-periods/1", "host": ["{{baseUrl}}"], "path": ["financial-periods", "1"]}, "body": {"mode": "raw", "raw": "{\n  \"name\": \"2026-Q1 Actualizado\"\n}"} } },
+        { "name": "Delete", "request": {"method": "DELETE", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/financial-periods/1", "host": ["{{baseUrl}}"], "path": ["financial-periods", "1"]} } }
+      ]
     },
     {
-      "name": "Advisor - Create",
-      "request": {
-        "method": "POST",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "url": {"raw": "http://localhost:3000/advisors", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["advisors"]},
-        "body": {"mode": "raw", "raw": "{\n  \"name\": \"Ana Asesora\",\n  \"email\": \"ana.asesora@banco.com\",\n  \"phone\": \"555-5678\",\n  \"userId\": 1\n}"}
-      }
+      "name": "Transactions",
+      "item": [
+        { "name": "Create", "request": {"method": "POST", "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"]}, "body": {"mode": "raw", "raw": "{\n  \"originAccountId\": 1,\n  \"destinationAccountId\": 2,\n  \"amount\": 500,\n  \"description\": \"Pago de servicios\"\n}"}} },
+        { "name": "Get All", "request": {"method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"]} } },
+        { "name": "Get By Id", "request": {"method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/transactions/1", "host": ["{{baseUrl}}"], "path": ["transactions", "1"]} } },
+        { "name": "Update", "request": {"method": "PATCH", "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/transactions/1", "host": ["{{baseUrl}}"], "path": ["transactions", "1"]}, "body": {"mode": "raw", "raw": "{\n  \"amount\": 750\n}"}} },
+        { "name": "Delete", "request": {"method": "DELETE", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/transactions/1", "host": ["{{baseUrl}}"], "path": ["transactions", "1"]} } }
+      ]
     },
     {
-      "name": "Advisor - Get All",
-      "request": {"method": "GET", "url": {"raw": "http://localhost:3000/advisors", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["advisors"]}}
+      "name": "Products",
+      "item": [
+        { "name": "Create", "request": {"method": "POST", "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"]}, "body": {"mode": "raw", "raw": "{\n  \"name\": \"Tarjeta Oro\",\n  \"type\": \"Credit Card\",\n  \"description\": \"Tarjeta de crédito premium\"\n}"} } },
+        { "name": "Get All", "request": {"method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"]} } },
+        { "name": "Get By Id", "request": {"method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/products/1", "host": ["{{baseUrl}}"], "path": ["products", "1"]} } },
+        { "name": "Update", "request": {"method": "PATCH", "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/products/1", "host": ["{{baseUrl}}"], "path": ["products", "1"]}, "body": {"mode": "raw", "raw": "{\n  \"description\": \"Tarjeta actualizada\"\n}"} } },
+        { "name": "Delete", "request": {"method": "DELETE", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/products/1", "host": ["{{baseUrl}}"], "path": ["products", "1"]} } }
+      ]
     },
     {
-      "name": "AccountType - Create",
-      "request": {
-        "method": "POST",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "url": {"raw": "http://localhost:3000/account-types", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["account-types"]},
-        "body": {"mode": "raw", "raw": "{\n  \"name\": \"Premium\",\n  \"productId\": 1\n}"}
-      }
+      "name": "Consultas Especiales",
+      "item": [
+        { "name": "Clientes activos con cuentas", "request": { "method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/clients/active-with-accounts", "host": ["{{baseUrl}}"], "path": ["clients", "active-with-accounts"]}, "description": "Retorna clientes activos con sus cuentas asociadas" } },
+        { "name": "Cuentas de un cliente", "request": { "method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/accounts/by-client/1", "host": ["{{baseUrl}}"], "path": ["accounts", "by-client", "1"]}, "description": "Retorna todas las cuentas de un cliente específico" } },
+        { "name": "Asesores con 2+ cuentas", "request": { "method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/advisors/multiple-accounts", "host": ["{{baseUrl}}"], "path": ["advisors", "multiple-accounts"]}, "description": "Retorna asesores que gestionan 2 o más cuentas" } },
+        { "name": "Transacciones por cuenta y periodo", "request": { "method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/transactions/account/1/period/1", "host": ["{{baseUrl}}"], "path": ["transactions", "account", "1", "period", "1"]}, "description": "Retorna transacciones de una cuenta en un periodo financiero" } }
+      ]
     },
     {
-      "name": "AccountType - Get All",
-      "request": {"method": "GET", "url": {"raw": "http://localhost:3000/account-types", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["account-types"]}}
+      "name": "Filtros y Reportes",
+      "item": [
+        { "name": "Filtrar clientes (AND)", "request": { "method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/clients/filter?accountTypeId=1&periodId=1", "host": ["{{baseUrl}}"], "path": ["clients", "filter"], "query": [{"key": "accountTypeId", "value": "1"}, {"key": "periodId", "value": "1"}]}, "description": "Filtra clientes activos con cuentas de un tipo y transacciones en un periodo usando operador AND" } },
+        { "name": "Filtrar asesores (AND/OR/NOT)", "request": { "method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/advisors/filter-complex", "host": ["{{baseUrl}}"], "path": ["advisors", "filter-complex"]}, "description": "Filtra asesores tiempo completo que gestionan cuentas O están activos usando operadores AND, OR, NOT" } },
+        { "name": "Reporte SQL nativo", "request": { "method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/transactions/report", "host": ["{{baseUrl}}"], "path": ["transactions", "report"]}, "description": "Genera reporte con SQL nativo usando $queryRaw de Prisma" } }
+      ]
     },
     {
-      "name": "FinancialPeriod - Create",
-      "request": {
-        "method": "POST",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "url": {"raw": "http://localhost:3000/financial-periods", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["financial-periods"]},
-        "body": {"mode": "raw", "raw": "{\n  \"name\": \"2026-Q1\",\n  \"startDate\": \"2026-01-01T00:00:00Z\",\n  \"endDate\": \"2026-03-31T23:59:59Z\"\n}"}
-      }
-    },
-    {
-      "name": "FinancialPeriod - Get All",
-      "request": {"method": "GET", "url": {"raw": "http://localhost:3000/financial-periods", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["financial-periods"]}}
-    },
-    {
-      "name": "Transaction - Create",
-      "request": {
-        "method": "POST",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "url": {"raw": "http://localhost:3000/transactions", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["transactions"]},
-        "body": {"mode": "raw", "raw": "{\n  \"accountOriginId\": 1,\n  \"accountDestinationId\": 2,\n  \"amount\": 500,\n  \"description\": \"Pago de servicios\"\n}"}
-      }
-    },
-    {
-      "name": "Transaction - Get All",
-      "request": {"method": "GET", "url": {"raw": "http://localhost:3000/transactions", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["transactions"]}}
-    },
-    {
-      "name": "Product - Create",
-      "request": {
-        "method": "POST",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "url": {"raw": "http://localhost:3000/products", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["products"]},
-        "body": {"mode": "raw", "raw": "{\n  \"name\": \"Tarjeta Oro\",\n  \"type\": \"Credit Card\",\n  \"description\": \"Tarjeta de crédito premium\"\n}"}
-      }
-    },
-    {
-      "name": "Product - Get All",
-      "request": {"method": "GET", "url": {"raw": "http://localhost:3000/products", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["products"]}}
-    },
-    {
-      "name": "Clients - Update",
-      "request": {
-        "method": "PATCH",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "url": {"raw": "http://localhost:3000/clients/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["clients", "1"]},
-        "body": {"mode": "raw", "raw": "{\n  \"name\": \"Carlos Cliente Actualizado\"\n}"}
-      }
-    },
-    {
-      "name": "Clients - Delete",
-      "request": {"method": "DELETE", "url": {"raw": "http://localhost:3000/clients/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["clients", "1"]}}
-    },
-    {
-      "name": "Accounts - Update",
-      "request": {
-        "method": "PATCH",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "url": {"raw": "http://localhost:3000/accounts/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["accounts", "1"]},
-        "body": {"mode": "raw", "raw": "{\n  \"balance\": 2000\n}"}
-      }
-    },
-    {
-      "name": "Accounts - Delete",
-      "request": {"method": "DELETE", "url": {"raw": "http://localhost:3000/accounts/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["accounts", "1"]}}
-    },
-    {
-      "name": "Advisor - Update",
-      "request": {
-        "method": "PATCH",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "url": {"raw": "http://localhost:3000/advisors/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["advisors", "1"]},
-        "body": {"mode": "raw", "raw": "{\n  \"phone\": \"555-9999\"\n}"}
-      }
-    },
-    {
-      "name": "Advisor - Delete",
-      "request": {"method": "DELETE", "url": {"raw": "http://localhost:3000/advisors/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["advisors", "1"]}}
-    },
-    {
-      "name": "AccountType - Update",
-      "request": {
-        "method": "PATCH",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "url": {"raw": "http://localhost:3000/account-types/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["account-types", "1"]},
-        "body": {"mode": "raw", "raw": "{\n  \"name\": \"Premium Actualizado\"\n}"}
-      }
-    },
-    {
-      "name": "AccountType - Delete",
-      "request": {"method": "DELETE", "url": {"raw": "http://localhost:3000/account-types/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["account-types", "1"]}}
-    },
-    {
-      "name": "FinancialPeriod - Update",
-      "request": {
-        "method": "PATCH",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "url": {"raw": "http://localhost:3000/financial-periods/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["financial-periods", "1"]},
-        "body": {"mode": "raw", "raw": "{\n  \"name\": \"2026-Q1 Actualizado\"\n}"}
-      }
-    },
-    {
-      "name": "FinancialPeriod - Delete",
-      "request": {"method": "DELETE", "url": {"raw": "http://localhost:3000/financial-periods/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["financial-periods", "1"]}}
-    },
-    {
-      "name": "Transaction - Update",
-      "request": {
-        "method": "PATCH",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "url": {"raw": "http://localhost:3000/transactions/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["transactions", "1"]},
-        "body": {"mode": "raw", "raw": "{\n  \"amount\": 750\n}"}
-      }
-    },
-    {
-      "name": "Transaction - Delete",
-      "request": {"method": "DELETE", "url": {"raw": "http://localhost:3000/transactions/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["transactions", "1"]}}
-    },
-    {
-      "name": "Product - Update",
-      "request": {
-        "method": "PATCH",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "url": {"raw": "http://localhost:3000/products/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["products", "1"]},
-        "body": {"mode": "raw", "raw": "{\n  \"description\": \"Tarjeta actualizada\"\n}"}
-      }
-    },
-    {
-      "name": "Product - Delete",
-      "request": {"method": "DELETE", "url": {"raw": "http://localhost:3000/products/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["products", "1"]}}
+      "name": "Transacciones ACID",
+      "item": [
+        { "name": "Crear transacción (ACID)", "request": { "method": "POST", "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "body": {"mode": "raw", "raw": "{\n  \"originAccountId\": 1,\n  \"destinationAccountId\": 2,\n  \"amount\": 500,\n  \"description\": \"Pago de servicios\",\n  \"transactionAt\": \"2026-02-25T20:00:00Z\"\n}"}, "url": {"raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"]}, "description": "Crea transacción con control ACID: Atomicidad, Consistencia, Aislamiento, Durabilidad. Una transacción ACID garantiza que todas las operaciones bancarias sean atómicas (todo o nada), consistentes (el estado del sistema siempre es válido), aisladas (no afectan otras transacciones concurrentes) y durables (los cambios persisten ante fallos)." } },
+        { "name": "Verificar transacción creada", "request": { "method": "GET", "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "url": {"raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"]}, "description": "Lista todas las transacciones para verificar la creación exitosa" } },
+        { "name": "Intentar transacción duplicada (Debe fallar)", "request": { "method": "POST", "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ], "body": {"mode": "raw", "raw": "{\n  \"originAccountId\": 1,\n  \"destinationAccountId\": 2,\n  \"amount\": 500,\n  \"description\": \"Pago de servicios\",\n  \"transactionAt\": \"2026-02-25T20:00:00Z\"\n}"}, "url": {"raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"]}, "description": "Intenta crear la misma transacción nuevamente. Debe retornar error 409 Conflict" } }
+      ]
     }
   ]
 }
+

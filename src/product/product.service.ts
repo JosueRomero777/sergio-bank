@@ -42,4 +42,24 @@ export class ProductService {
     }
     return product;
   }
+  async update(id: number, updateProductDto: UpdateProductDto) {
+    const product = await this.prismaBanco.product.findUnique({ where: { id } });
+    if (!product) {
+      throw new NotFoundException(`Product with id ${id} not found`);
+    }
+    return this.prismaBanco.product.update({
+      where: { id },
+      data: updateProductDto,
+    });
+  }
+
+  async remove(id: number) {
+    const product = await this.prismaBanco.product.findUnique({ where: { id } });
+    if (!product) {
+      throw new NotFoundException(`Product with id ${id} not found`);
+    }
+    return this.prismaBanco.product.delete({
+      where: { id },
+    });
+  }
 }

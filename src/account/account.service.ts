@@ -7,6 +7,16 @@ import { UpdateAccountDto } from './dto/update-account.dto';
 export class AccountService {
   constructor(private prismaBanco: PrismaBancoService) { }
 
+  async getByClient(clientId: number) {
+    return this.prismaBanco.account.findMany({
+      where: { clientId },
+      include: {
+        transactionsOrigin: true,
+        transactionsDestination: true,
+      },
+    });
+  }
+
   async create(createAccountDto: CreateAccountDto) {
     return this.prismaBanco.account.create({
       data: createAccountDto,
@@ -53,6 +63,31 @@ export class AccountService {
         transactionsOrigin: true,
         transactionsDestination: true,
       },
+    });
+  }
+  async update(id: number, updateAccountDto: UpdateAccountDto) {
+    const account = await this.prismaBanco.account.findUnique({ where: { id } });
+    if (!account) {
+      throw new NotFoundException(`Account with id ${id} not found`);
+    }
+    return this.prismaBanco.account.update({
+      where: { id },
+      data: updateAccountDto,
+      include: {
+        client: true,
+        transactionsOrigin: true,
+        transactionsDestination: true,
+      },
+    });
+  }
+
+  async remove(id: number) {
+    const account = await this.prismaBanco.account.findUnique({ where: { id } });
+    if (!account) {
+      throw new NotFoundException(`Account with id ${id} not found`);
+    }
+    return this.prismaBanco.account.delete({
+      where: { id },
     });
   }
 }
