@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client-banco"
+  previewFeatures = ["driverAdapters"]
+}
+
+ 
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_BANCO_URL")
+  
+}
+// Modelos bancarios equivalentes
+
+model Client {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String   @unique
+  address     String?
+  phone       String?
+  accounts    Account[]
+  products    ProductClient[]
+    clientAccounts ClientAccount[]
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("clients")
+}
+
+model Account {
+  id          Int      @id @default(autoincrement())
+  number      String   @unique
+  type        String
+  balance     Float    @default(0)
+  clientId    Int      @map("client_id")
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  transactionsOrigin  Transaction[] @relation("AccountOrigin")
+  transactionsDestination Transaction[] @relation("AccountDestination")
+    accountTypeId Int?
+    accountType   AccountType? @relation(fields: [accountTypeId], references: [id])
+    advisorAccounts AdvisorAccount[]
+    clientAccounts ClientAccount[]
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([clientId])
+  @@map("accounts")
+}
+
+model Transaction {
+  id            Int      @id @default(autoincrement())
+  accountOriginId  Int    @map("account_origin_id")
+  accountDestinationId Int    @map("account_destination_id")
+  amount         Float
+  description    String?
+  date           DateTime @default(now())
+  accountOrigin  Account   @relation("AccountOrigin", fields: [accountOriginId], references: [id])
+  accountDestination Account   @relation("AccountDestination", fields: [accountDestinationId], references: [id])
+    financialPeriodId Int?
+    financialPeriod   FinancialPeriod? @relation(fields: [financialPeriodId], references: [id])
+
+  @@index([accountOriginId])
+  @@index([accountDestinationId])
+  @@map("transactions")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  type        String
+  clients     ProductClient[]
+  accountTypes AccountType[]
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("products")
+}
+
+model ProductClient {
+  id          Int      @id @default(autoincrement())
+  clientId    Int      @map("client_id")
+  productId   Int      @map("product_id")
+  date        DateTime @default(now())
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([productId])
+  @@map("product_clients")
+}
+
+
+model AccountType {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  accounts  Account[]
+  productId Int?
+  product   Product? @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("account_types")
+}
+
+model FinancialPeriod {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(true)
+  transactions Transaction[]
+    advisors Advisor[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("financial_periods")
+}
+
+model Advisor {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  advisorAccounts AdvisorAccount[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("advisors")
+    financialPeriodId Int?
+    financialPeriod   FinancialPeriod? @relation(fields: [financialPeriodId], references: [id])
+}
+
+model AdvisorAccount {
+  id        Int      @id @default(autoincrement())
+  advisorId Int     @map("advisor_id")
+  accountId Int     @map("account_id")
+  advisor   Advisor @relation(fields: [advisorId], references: [id], onDelete: Cascade)
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  @@index([advisorId])
+  @@index([accountId])
+  @@map("advisor_accounts")
+}
+
+model ClientAccount {
+  id        Int      @id @default(autoincrement())
+  clientId  Int     @map("client_id")
+  accountId Int     @map("account_id")
+  status    String
+  balance   Float   @default(0)
+  client    Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  @@index([clientId])
+  @@index([accountId])
+  @@map("client_accounts")
+}
+

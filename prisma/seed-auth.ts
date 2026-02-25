@@ -1,3 +1,4 @@
+
 import { config } from 'dotenv';
 config({ path: '.env' });
 import { PrismaClient } from './generated/client-auth';
@@ -6,19 +7,25 @@ import * as bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-    console.log('🌱 Seeding auth database...');
-
+    console.log('🌱 Seeding banco auth database...');
     await prisma.$connect();
 
-    // --- Permissions ---
+    // --- Permisos ---
     const permissionsData = [
-        { name: 'users:read', description: 'Leer usuarios' },
-        { name: 'users:write', description: 'Crear y modificar usuarios' },
-        { name: 'users:delete', description: 'Eliminar usuarios' },
-        { name: 'roles:manage', description: 'Gestionar roles' },
+        { name: 'clients:read', description: 'Leer clientes' },
+        { name: 'clients:write', description: 'Crear y modificar clientes' },
+        { name: 'accounts:read', description: 'Leer cuentas' },
+        { name: 'accounts:write', description: 'Crear y modificar cuentas' },
+        { name: 'transactions:read', description: 'Leer transacciones' },
+        { name: 'transactions:write', description: 'Crear y modificar transacciones' },
+        { name: 'products:read', description: 'Leer productos' },
+        { name: 'products:write', description: 'Crear y modificar productos' },
+        { name: 'advisors:read', description: 'Leer asesores' },
+        { name: 'advisors:write', description: 'Crear y modificar asesores' },
+        { name: 'roles:manage', description: 'Gestionar roles y permisos' },
     ];
 
-    console.log('Validating permissions...');
+    console.log('Validando permisos...');
     for (const p of permissionsData) {
         await prisma.permission.upsert({
             where: { name: p.name },
@@ -31,12 +38,12 @@ async function main() {
 
     // --- Roles ---
     const rolesData = [
-        { name: 'ADMIN', description: 'Administrador del sistema' },
-        { name: 'STUDENT', description: 'Estudiante' },
-        { name: 'TEACHER', description: 'Docente' },
+        { name: 'ADMIN', description: 'Administrador del banco' },
+        { name: 'CLIENT', description: 'Cliente del banco' },
+        { name: 'ADVISOR', description: 'Asesor bancario' },
     ];
 
-    console.log('Validating roles...');
+    console.log('Validando roles...');
     for (const r of rolesData) {
         await prisma.role.upsert({
             where: { name: r.name },
@@ -46,56 +53,54 @@ async function main() {
     }
 
     const adminRole = await prisma.role.findUniqueOrThrow({ where: { name: 'ADMIN' } });
-    const studentRole = await prisma.role.findUniqueOrThrow({ where: { name: 'STUDENT' } });
-    const teacherRole = await prisma.role.findUniqueOrThrow({ where: { name: 'TEACHER' } });
+    const clientRole = await prisma.role.findUniqueOrThrow({ where: { name: 'CLIENT' } });
+    const advisorRole = await prisma.role.findUniqueOrThrow({ where: { name: 'ADVISOR' } });
 
-    // --- RolePermissions (ADMIN gets all permissions) ---
-    console.log('Assigning permissions to ADMIN role...');
+    // --- RolePermissions (ADMIN tiene todos los permisos) ---
+    console.log('Asignando permisos a ADMIN...');
     const adminPermissionsData = allPermissions.map((p) => ({
         roleId: adminRole.id,
         permissionId: p.id,
     }));
-
     await prisma.rolePermission.createMany({
         data: adminPermissionsData,
         skipDuplicates: true,
     });
 
-    // --- Users ---
+    // --- Usuarios ---
     const hashedPasswordAdmin = await bcrypt.hash('admin123', 10);
-    const hashedPasswordStudent = await bcrypt.hash('student123', 10);
-    const hashedPasswordTeacher = await bcrypt.hash('teacher123', 10);
+    const hashedPasswordClient = await bcrypt.hash('client123', 10);
+    const hashedPasswordAdvisor = await bcrypt.hash('advisor123', 10);
 
     const usersData = [
         {
-            name: 'Admin User',
-            email: 'admin@universidad.edu',
+            name: 'Banco Admin',
+            email: 'admin@banco.com',
             username: 'admin',
             password: hashedPasswordAdmin,
             isActive: true,
-            roleId: adminRole.id, // Helper for next step
+            roleId: adminRole.id,
         },
         {
-            name: 'Juan Pérez',
-            email: 'juan.perez@universidad.edu',
-            username: 'jperez',
-            password: hashedPasswordStudent,
+            name: 'Carlos Cliente',
+            email: 'carlos.cliente@banco.com',
+            username: 'ccliente',
+            password: hashedPasswordClient,
             isActive: true,
-            roleId: studentRole.id,
+            roleId: clientRole.id,
         },
         {
-            name: 'María García',
-            email: 'maria.garcia@universidad.edu',
-            username: 'mgarcia',
-            password: hashedPasswordTeacher,
+            name: 'Ana Asesora',
+            email: 'ana.asesora@banco.com',
+            username: 'aasesora',
+            password: hashedPasswordAdvisor,
             isActive: true,
-            roleId: teacherRole.id,
+            roleId: advisorRole.id,
         },
     ];
 
-    console.log('Validating users...');
+    console.log('Validando usuarios...');
     for (const u of usersData) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { roleId, ...userData } = u;
         await prisma.user.upsert({
             where: { email: u.email },
@@ -105,30 +110,28 @@ async function main() {
     }
 
     // --- UserRoles ---
-    console.log('Assigning roles to users...');
-    // We need to fetch users to get their IDs
-    const adminUser = await prisma.user.findUniqueOrThrow({ where: { email: 'admin@universidad.edu' } });
-    const studentUser = await prisma.user.findUniqueOrThrow({ where: { email: 'juan.perez@universidad.edu' } });
-    const teacherUser = await prisma.user.findUniqueOrThrow({ where: { email: 'maria.garcia@universidad.edu' } });
+    console.log('Asignando roles a usuarios...');
+    const adminUser = await prisma.user.findUniqueOrThrow({ where: { email: 'admin@banco.com' } });
+    const clientUser = await prisma.user.findUniqueOrThrow({ where: { email: 'carlos.cliente@banco.com' } });
+    const advisorUser = await prisma.user.findUniqueOrThrow({ where: { email: 'ana.asesora@banco.com' } });
 
     const userRolesData = [
         { userId: adminUser.id, roleId: adminRole.id },
-        { userId: studentUser.id, roleId: studentRole.id },
-        { userId: teacherUser.id, roleId: teacherRole.id },
+        { userId: clientUser.id, roleId: clientRole.id },
+        { userId: advisorUser.id, roleId: advisorRole.id },
     ];
-
     await prisma.userRole.createMany({
         data: userRolesData,
         skipDuplicates: true,
     });
 
-    console.log(' Auth database seeded successfully (Idempotent)');
-    console.log('Users processed:', { adminUser: adminUser.email, studentUser: studentUser.email, teacherUser: teacherUser.email });
+    console.log(' Auth banco database seeded successfully (Idempotent)');
+    console.log('Usuarios procesados:', { adminUser: adminUser.email, clientUser: clientUser.email, advisorUser: advisorUser.email });
 }
 
 main()
     .catch((e) => {
-        console.error(' Error seeding auth database:', e);
+        console.error(' Error seeding banco auth database:', e);
         process.exit(1);
     })
     .finally(async () => {
